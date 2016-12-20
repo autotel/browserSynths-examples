@@ -112,6 +112,7 @@
       if(drumsOn)
       for(var a in tt){
         membrane[a].triggerAttackRelease(tt[a], "8n");
+        fakeConsole.log("drum"+tt[0]);
       }
     },
     memory:{

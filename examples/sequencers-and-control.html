@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Sequencer and controls example</title>
+    <link rel="stylesheet" href="../mscomponents/build/css/mscomponents.css">
+  </head>
+  <body>
+
+  </body>
+  <script src="../mscomponents/build/js/jquery.min.js"></script>
+  <script src="../mscomponents/build/build.js"></script>
+  <script src="../three.js/build/three.min.js"></script>
+  <script src="../Tone.js/build/Tone.js"></script>
+  <script>
+
+  var sequencer= new MsComponents.Sequencer($("body"),{});
+  var clock = new MsComponents.Clock($("body"),{interval:Math.random()*10+1});
+  sequencer.setClock(clock);
+
+  sequencer.on("trigger",function(a){
+    console.log(a);
+  });
+
+  </script>
+</html>
