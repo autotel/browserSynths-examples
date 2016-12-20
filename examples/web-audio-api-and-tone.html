@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Web audio API and tone example</title>
+  </head>
+  <body>
+    <pre id="fakeConsole" style="position:fixed; bottom:0; left:0;">
+    </pre>
+  </body>
+  <script src="../jquery/jquery.min.js"></script>
+  <script src="../mscomponents/build/js/jquery.min.js"></script>
+  <script src="../three.js/build/three.min.js"></script>
+  <script src="../Tone.js/build/Tone.js"></script>
+  <script src="masterLooper.js"></script>
+  <script>
+
+
+  Tone.Transport.start();
+
+  var effectsChain=[new Tone.Freeverb(0.5,30)];
+
+
+  var b=0;
+  for(b=0; b< effectsChain.length-1; b++){
+    effectsChain[b].connect(effectsChain[b+1]);
+  }
+  effectsChain[b].toMaster();
+
+  var synth = new Tone.FMSynth().connect(effectsChain[0]);
+
+  var membrane=[new Tone.MembraneSynth().connect(effectsChain[0]),new Tone.MembraneSynth().connect(effectsChain[0])];
+
+  var pattern=[];
+
+  var fakeConsole=(function(){
+    this.log=function(what){
+      what=JSON.stringify(what);
+      $("#fakeConsole").append("\n"+what+"")
+    }
+    return this;
+  })()
+  Tone.Transport.scheduleRepeat(function(time){
+  	masterLooper.step(time);
+  }, "96n");
+
+  var RR=function(array){
+    this.array=array;
+    this.len=array.length;
+    this.stepN=0;
+    this.get=function(){
+      var r= this.array[this.stepN%this.len];
+      this.stepN++;
+      return r;
+    }
+  }
+  var roundRobin=function(a){
+    return new RR(a);
+  }
+
+  masterLooper.create({
+    name:"synth sequencer",
+    every:8,
+    length:16,
+    onBeat:function(tt){
+      fakeConsole.log(tt);
+      if(tt[1]=="start"){
+        synth.triggerAttack();
+        synth.setNote(tt[0]);
+      }else if(tt[0]=="roundRobin"){
+        synth.setNote(tt[1].get());
+      }else{
+        synth.setNote(tt[0]);
+      }
+      // console.log(tt);
+    },
+    memory:{
+      0:["C2","start"],
+      1:["C3"],
+      2:["C4"],
+      3:["D3"],
+      8:["roundRobin",roundRobin(["G2","D2"])],
+      //8:["G4"],
+      12:["roundRobin",roundRobin(["G1","F1","D1","E1"])],
+    }
+  });
+  var drumsOn=false;
+  masterLooper.create({
+    every:4,
+    length:256,
+    onBeat:function(tt){
+      console.log(tt);
+      synth.modulationIndex=tt;
+      synth.detune=tt;
+      effectsChain[0].dampening.value=Math.sin(tt/256*Math.PI)*6000;
+      effectsChain[0].roomSize.value =Math.sin(tt/256*Math.PI)/3;
+      console.log(effectsChain[0].roomSize.value);
+      membrane[0];
+
+      if(tt<32){
+        drumsOn=false;
+      }else{
+        drumsOn=true;
+      }
+    },
+    memory:"all"
+  });
+
+  var drumLooper=masterLooper.create({
+    onBeat:function(tt){
+      // console.log(tt);
+      if(drumsOn)
+      for(var a in tt){
+        membrane[a].triggerAttackRelease(tt[a], "8n");
+      }
+    },
+    memory:{
+      0:["C2"],
+      1:["C2"],
+      2:["C2"],
+      3:["C3"],
+      8:["C3"],
+      9:["C4","F3"]
+    }
+  });
+
+
+
+  // pattern.push(new Tone.Part(function(time, value){
+  // 	membrane.triggerAttackRelease("C2", "8n", value.velocity);
+  // }, [{"time" : 0, "velocity": 0.9},
+  // 	  {"time" : "0:2", "velocity": 0.5}
+  // ]));
+  // pattern.push(new Tone.Pattern(function(time, note){
+  //
+  // }, ["C2", "D4", "E5", "A6"], "upDown"));
+  //
+  // every(pattern,"start",0);
+  //
+  // function every(object, callback,params){
+  //   for(var a in object)
+  //   object[a][callback]();
+  // }
+
+
+
+
+  </script>
+</html>

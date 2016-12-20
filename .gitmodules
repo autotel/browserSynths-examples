@@ -1,0 +1,9 @@
+[submodule "Tone.js"]
+	path = Tone.js
+	url = https://github.com/Tonejs/Tone.js
+[submodule "mscomponents"]
+	path = mscomponents
+	url = https://github.com/autotel/mscomponents
+[submodule "three.js"]
+	path = three.js
+	url = https://github.com/mrdoob/three.js
