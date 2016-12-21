@@ -14,12 +14,14 @@
   <script src="../Tone.js/build/Tone.js"></script>
   <script>
 
-  var sequencer= new MsComponents.Sequencer($("body"),{});
-  var clock = new MsComponents.Clock($("body"),{interval:Math.random()*10+1});
+  var sequencer= new MsComponents.Sequencer($("body"),{every:1});
+  var clock = new MsComponents.Clock($("body"),{interval:1});
   sequencer.setClock(clock);
 
+  var membrane= new Tone.MembraneSynth().toMaster();
   sequencer.on("trigger",function(a){
     console.log(a);
+    membrane.triggerAttackRelease("C2", "8n");
   });
 
   </script>
